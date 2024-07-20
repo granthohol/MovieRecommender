@@ -124,6 +124,26 @@ def print_recs(movies_no_user: pd.DataFrame):
 
     st.header('Top Movie Recommendations')
 
+
+    # create df changed to look better for output
+    output = movies_no_user.rename(columns={'name': 'Title', 'userRating': 'Predicted Rating', 'date':'Release Year', 'minute':'Runtime', 'rating':'Letterboxd Rating'})
+    
+    output = output.reset_index(drop=True)
+    output.index = output.index + 1
+    
+    output['Predicted Rating'] = output['Predicted Rating'].round(2)
+
+    # create new column genres that has a string literal of the one hot encoded features
+    genre_cols = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western']
+    def combine_genres(row):
+        return ', '.join([genre for genre in genre_cols if row[genre] == True])
+    
+    output['Genres'] = output.apply(combine_genres, axis=1)
+
+    output = output[['Title', 'Genres', 'Letterboxd Rating', 'Predicted Rating', 'Release Year', 'Runtime', 'tagline', 'description', 
+                    'adult', 'english']]
+    
+
     # Output top 5 with image, description, etc
 
     for i in range(5):
@@ -134,14 +154,21 @@ def print_recs(movies_no_user: pd.DataFrame):
             st.image(movies_no_user.iat[i, 6])
     
         with col2:
-            st.write(movies_no_user.iat[i, 1])
+            st.write(output.iat[i, 1]) # genres
+            st.write(movies_no_user.iat[i, 1]) # year
             st.write(f"Runtime: {movies_no_user.iat[i, 4]} minutes")
             st.write(f"Letterboxd Rating: {movies_no_user.iat[i, 5]}")
-            st.write(movies_no_user.iat[i, 2])
-            st.write(movies_no_user.iat[i, 3])
+            st.write(movies_no_user.iat[i, 2]) # tagline
+            st.write(movies_no_user.iat[i, 3]) # description
 
 
-    st.write(movies_no_user)
+    # TODO: try to fix index problem, change order of columns, can i print more than like 4 columns
+    # output full table
+    st.write("")
+    st.write("")
+    st.subheader('Full Table')
+    st.write('Expand to see all features')
+    st.dataframe(output)
 
 
 
@@ -153,22 +180,28 @@ def main():
         "A machine learning app to predict personal movie ratings for Letterboxd users. Also provides analysis of the users movie characteristic preferences."
     )
 
-    # Get ratings.csv file from user
-    csv_file = st.file_uploader(
-        "Upload your ratings.csv file from Letterboxd to get recommendations and insights. Note: It may take a second.", type="csv")
+    home, howto, about = st.tabs(['Home', 'How To', 'About'])
 
-    # Read into df, throw error message if it does not work
-    if csv_file is not None: 
-        try: 
-           user_ratings = pd.read_csv(csv_file)
-           test = user_ratings.drop(columns=["Letterboxd URI"])
-        except Exception as e:
-            st.write("Please try again. Enter a valid .csv file.")
-        else: 
-           # Do everything else pretty much
-           model = model_creation(user_ratings)
-           df_preds = predict(model, user_ratings)
-           print_recs(df_preds)
+    with home:
+        # Get ratings.csv file from user
+        csv_file = st.file_uploader(
+            "Upload your ratings.csv file from Letterboxd to get recommendations and insights. Note: It may take a second.", type="csv")
+
+        # Read into df, throw error message if it does not work
+        if csv_file is not None: 
+            try: 
+                user_ratings = pd.read_csv(csv_file)
+                test = user_ratings.drop(columns=["Letterboxd URI"])
+            except Exception as e:
+                st.write("Please try again. Enter a valid .csv file.")
+            else: 
+                # Do everything else pretty much
+                model = model_creation(user_ratings)
+                df_preds = predict(model, user_ratings)
+
+                preds, analysis = st.tabs(['Recommendations', 'Analysis'])
+                with preds:
+                    print_recs(df_preds)
            
 
 
