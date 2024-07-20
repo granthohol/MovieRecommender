@@ -21,7 +21,7 @@ def model_creation(user_ratings: pd.DataFrame):
     """
 
     ########## Initialize Data ##############
-    movies = pd.read_csv("D:/MovieRecommender/Data/movies_cleaned.csv")
+    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
     user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
     user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
     movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
@@ -72,7 +72,7 @@ def predict(model, user_ratings):
     """
 
     ########### Initialize Data #######################
-    movies = pd.read_csv("D:/MovieRecommender/Data/movies_cleaned.csv")
+    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
     user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
     user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
     merged_df = pd.merge(movies, user_ratings, how='outer', on=['name', 'date'])
@@ -141,7 +141,7 @@ def print_recs(movies_no_user: pd.DataFrame):
             st.write(movies_no_user.iat[i, 3])
 
 
-    st.write(movies_no_user.reset_index)
+    st.write(movies_no_user)
 
 
 
@@ -155,14 +155,14 @@ def main():
 
     # Get ratings.csv file from user
     csv_file = st.file_uploader(
-        "Upload your ratings.csv file from Letterboxd to get recommendations and insights.\nRemember: The more movies logged the better!\nNote: It may take a second.", type="csv")
+        "Upload your ratings.csv file from Letterboxd to get recommendations and insights. Note: It may take a second.", type="csv")
 
     # Read into df, throw error message if it does not work
     if csv_file is not None: 
         try: 
            user_ratings = pd.read_csv(csv_file)
+           test = user_ratings.drop(columns=["Letterboxd URI"])
         except Exception as e:
-            st.write("Error:", e)
             st.write("Please try again. Enter a valid .csv file.")
         else: 
            # Do everything else pretty much
