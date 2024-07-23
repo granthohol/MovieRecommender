@@ -427,8 +427,31 @@ def main():
                   " Submit the file 'ratings.csv' from your downloaded folder and watch the magic happen!")
         st.write("Important: Make sure you are submitting 'ratings.csv' and nothing else!")
 
-    #with about:
+    with about:
+        st.header("The Data")
+        st.write(f"The data for this website was obtained from two different Kaggle datasets." + 
+                 " Big thanks to [Simon Garanin]{'https://www.kaggle.com/gsimonx37'} and [Asanickza]{'https://www.kaggle.com/asaniczka'} for supplying these.")
+        st.write(f"1. [Letterboxd data]{'https://www.kaggle.com/datasets/gsimonx37/letterboxd'}")
+        st.write(f"2. [Data for movie popularity]{'https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies'}")
 
+        st.write('')
+
+        st.header('The Model')
+        st.subheader('Type')
+        st.write('The model used to make ratings predictions is a Ridge Regression model that gets trained on the user data once submitted.')
+        st.write('I chose a Ridge Regression model because it performed well compared to other models on test data from my ratings and some of my friends.' +
+                 ' It is also a fast and interpretable model which helps a lot with what I am trying to accomplish -- training the model in live time and ' +
+                 'outputting feature coefficients to the user.')
+        st.subheader('Parameters')
+        st.write('The models parameters are determined, again, in live time after user submission. I use a Grid Search to determine the best parameters for the particular user.')
+        st.write(f'You can check out the code for this website in more detail on my [github]{'https://github.com/granthohol/MovieRecommender.com'}')
+
+        st.header('Bugs and Suggestions')
+        st.write('Any bugs on the website or general suggestions you have can be emailed to ghohol@wisc.edu.'+
+                 ' I appreciate any and all feedback! I will always be looking to add additional features.' +
+                 ' You can also pull the code from the github linked above to add anything you want yourself.')
+        
+        st.header('Patch Notes')
 
     with me:
         st.title("About The Creator")
