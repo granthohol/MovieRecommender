@@ -8,7 +8,7 @@ from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
 
 
-
+@st.cache_data
 def model_creation(user_ratings: pd.DataFrame):
     """
     Train a ridge regression model based on the users ratings and return the trained model
@@ -48,7 +48,7 @@ def model_creation(user_ratings: pd.DataFrame):
     ridge = Ridge()
 
     # Perform grid search with cross-validation
-    grid_search = GridSearchCV(estimator=ridge, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error')
+    grid_search = GridSearchCV(estimator=ridge, param_grid=param_grid, cv=12, scoring='neg_mean_squared_error')
     grid_search.fit(features, target)
 
     # Train the model with the best parameters
@@ -56,7 +56,6 @@ def model_creation(user_ratings: pd.DataFrame):
     best_ridge.fit(features, target)
 
     return best_ridge
-
 
 
 def predict(model, user_ratings):
@@ -117,12 +116,52 @@ def print_recs(movies_no_user: pd.DataFrame):
     """
     ########### Output to app ##################
 
+    #TODO: more sidebar filters
     # Sidebar
+    st.sidebar.title('Filters')
+    st.sidebar.subheader('Use the filters to edit what types of movies come up as recommendations')
+    # Filter for only english movies
     only_english = st.sidebar.checkbox("English Only", False)
     if only_english:
         movies_no_user = movies_no_user[movies_no_user['english'] == True]
+    
+    # filter for only kids movies
+    only_kid = st.sidebar.checkbox("Non-Adult Only", False)
+    if only_kid:
+        movies_no_user = movies_no_user[movies_no_user['adult'] == False]
 
-    st.header('Top Movie Recommendations')
+    # Slider filter for minimum rating
+    rating_min = st.sidebar.select_slider(
+        'Letterboxd rating minimum',
+        options=[round(x * 0.1,1) for x in range(0, 51)],
+        value=(0.0)
+    )
+    movies_no_user = movies_no_user[movies_no_user['rating'] >= rating_min]
+
+    # slider for maximum and minimum runtime
+    runtime_slider = st.sidebar.select_slider(
+        'Range for movie runtime', 
+        options=list(range(45, 301)),
+        value=(45, 300)
+    )
+    movies_no_user = movies_no_user[(movies_no_user['minute'] >= runtime_slider[0]) & (movies_no_user['minute'] <= runtime_slider[1])]
+
+    # multiselect filter for genres
+    genre_filter = st.sidebar.multiselect(
+        "Must have genre(s)",
+        ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 
+         'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western']
+    )
+    movies_no_user = movies_no_user[movies_no_user[genre_filter].all(axis=1)]
+
+    # Text input for minimum release year
+    year_min = st.sidebar.text_input("Minimum Release Year", "1900")
+    movies_no_user = movies_no_user[movies_no_user['date'] >= year_min]
+
+
+
+
+    st.title('Top Movie Recommendations')
 
 
     # create df changed to look better for output
@@ -130,7 +169,7 @@ def print_recs(movies_no_user: pd.DataFrame):
     
     output = output.reset_index(drop=True)
     output.index = output.index + 1
-    
+
     output['Predicted Rating'] = output['Predicted Rating'].round(2)
 
     # create new column genres that has a string literal of the one hot encoded features
@@ -147,6 +186,7 @@ def print_recs(movies_no_user: pd.DataFrame):
     # Output top 5 with image, description, etc
 
     for i in range(5):
+        st.write('')
         col1, col2 = st.columns([0.3, 0.7], vertical_alignment="bottom")
 
         with col1:
@@ -162,13 +202,155 @@ def print_recs(movies_no_user: pd.DataFrame):
             st.write(movies_no_user.iat[i, 3]) # description
 
 
-    # TODO: try to fix index problem, change order of columns, can i print more than like 4 columns
     # output full table
     st.write("")
     st.write("")
-    st.subheader('Full Table')
+    st.header('Full Table')
     st.write('Expand to see all features')
+    st.write('Use search button to search for a movie. You can also sort by column by clicking on the header.')
     st.dataframe(output)
+
+
+def print_analysis(movies_no_user, user_ratings, model):
+    """
+    Prints visuals of the users personalized movie preferences and stats
+
+    Parameters:
+    - movies_no_user: the df of movies the user has not seen with their predicted rating
+    - user_ratings: the df of movies the user has seen with their personal ratings
+    - model: the Ridge regression model trained to predict user ratings
+    
+    Returns: 
+    - None
+    """
+
+    ############### Feature Importance Output ########################
+    coefficients = model.coef_
+
+    feature_names = ['rating', 'adult', 'date', 'num_votes', 'minute', 'english',
+                     'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 
+                     'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western']
+
+    feature_importance = pd.DataFrame({
+        'Feature': feature_names,
+        'Coefficient': coefficients
+    })
+
+    feature_importance = feature_importance.sort_values(by='Coefficient', ascending=False)
+
+    ######## Genre ################
+    genre_feature_importance = feature_importance[feature_importance['Feature'].isin(['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 
+            'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'])]
+
+    st.header("By Genre")
+    st.write('Expand for a better view')
+    # Initialize Matplotlib figure and axis
+    fig, genre = plt.subplots(figsize=(24, 20))
+
+    # Plotting on the axis
+    genre.barh(genre_feature_importance['Feature'], genre_feature_importance['Coefficient'], color=['green' if coef > 0 else 'red' for coef in genre_feature_importance['Coefficient']])
+    genre.set_xlabel('Importance')
+    genre.set_title('Personal Genre Preferences', fontsize=36)
+    genre.invert_yaxis()  # Highest importance at the top
+    genre.tick_params(axis='y', labelsize=32)
+
+    # Add legend for custom colors
+    positive_bar = plt.Line2D([0, 1], [0, 0], color='green', linewidth=4, linestyle='-')
+    negative_bar = plt.Line2D([0, 1], [0, 0], color='red', linewidth=4, linestyle='-')
+    genre.legend([positive_bar, negative_bar], ['You tend to like this genre', 'You tend to not like this genre'], loc='lower right', fontsize=24)
+
+    # Display the plot using st.pyplot()
+    st.pyplot(fig)
+    st.write('This graph tells you how much each genre, removing all other factors, effects your personal ratings. ' + 
+             'The further to the right, the more you like that genre, and the further to the left, the more you dislike that genre, according to the model.')
+    
+
+
+    ########## Runtime ##############
+    other_feat_importance = feature_importance[feature_importance['Feature'].isin(['english', 'num_votes', 'minute', 'date', 'adult'])]
+    other_feat_importance.loc[other_feat_importance['Feature'] == 'date', 'Feature'] = 'Release Year'
+    other_feat_importance.loc[other_feat_importance['Feature'] == 'num_votes', 'Feature'] = 'Popularity'
+    other_feat_importance.loc[other_feat_importance['Feature'] == 'minute', 'Feature'] = 'Runtime'
+    other_feat_importance.loc[other_feat_importance['Feature'] == 'adult', 'Feature'] = 'Is Adult'
+    other_feat_importance.loc[other_feat_importance['Feature'] == 'english', 'Feature'] = 'In English'
+
+    st.write('')
+    st.header("By Other Features")
+
+    fig2, others = plt.subplots(figsize=(24,20))
+    others.barh(other_feat_importance['Feature'], other_feat_importance['Coefficient'], color=['green' if coef > 0 else 'red' for coef in other_feat_importance['Coefficient']])
+    others.set_xlabel('Importance')
+    others.set_title('Personal Features Preference', fontsize=36)
+    others.invert_yaxis()
+    others.tick_params(axis='y', labelsize=32)
+
+    positive_bar = plt.Line2D([0, 1], [0, 0], color='green', linewidth=4, linestyle='-')
+    negative_bar = plt.Line2D([0, 1], [0, 0], color='red', linewidth=4, linestyle='-')
+    others.legend([positive_bar, negative_bar], ['You tend to like when this feature is greater or true', 'You tend to like when this feature is less or false'], loc='lower right', fontsize=24)
+
+    st.pyplot(fig2)
+    st.write('Same idea here! If the bar is to the right, you like when that feature is a greater value or true (later release year, higher popularity, in english, etc).' +
+             ' If the bar is to the left, you like when that feature is a lower value or false (Is NOT in English, shorter runtime, etc).')
+    
+
+    ########## Ratings Analysis ###############
+    import plotly.express as px
+
+    st.write('')
+    st.title('Your Ratings vs Letterboxd Ratings')
+
+    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
+    user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
+    user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
+    movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
+    movies_with_user = movies_with_user.drop_duplicates(subset=['name', 'date'])
+    
+    
+    # Create a Plotly figure
+    fig3 = px.scatter(movies_with_user, x='rating', y='userRating', trendline='ols', marginal_y='violin',
+                 title='User Ratings vs Letterboxd Ratings',
+                 hover_name='name', hover_data={'rating': True, 'userRating': True})
+
+    fig3.update_layout(
+        xaxis_title='Letterboxd Rating',
+        yaxis_title='User Rating',
+        hoverlabel=dict(
+            bgcolor="white",  # Background color of tooltip
+            font_size=12,     # Font size of tooltip text
+            font_family="Arial"
+        ),
+        height=600,
+        width=800
+    )
+
+    st.plotly_chart(fig3) 
+    st.write('Here you can see the correlation between your ratings and letterboxd ratings. Expand for a better view and hover over dots to see which movie it is.')
+    st.write('')
+
+
+    # Top 5 movies liked more and liked less
+
+    movies_with_user['Difference'] = movies_with_user['userRating'] - movies_with_user['rating']
+    temp = movies_with_user.rename(columns={'userRating': 'Personal Rating', 'rating':'Letterboxd Rating', 'name':'Movie'})
+    movies_liked_more = temp.sort_values(by=['Difference'], ascending=False)[['Movie', 'Personal Rating', 'Letterboxd Rating', 'Difference']]
+    movies_liked_less = temp.sort_values(by=['Difference'], ascending=True)[['Movie', 'Personal Rating', 'Letterboxd Rating', 'Difference']]
+
+    st.header('Top 5 Movies You Liked More than Letterboxd')
+    movies_liked_more = movies_liked_more.reset_index(drop=True)
+    movies_liked_more.index = movies_liked_more.index + 1
+    st.dataframe(movies_liked_more.head())
+    st.write('')
+
+    st.header('Top 5 Movies You Liked Less than Letterboxd')
+    movies_liked_less = movies_liked_less.reset_index(drop=True)
+    movies_liked_less.index = movies_liked_less.index + 1
+    st.dataframe(movies_liked_less.head())
+
+
+
+
+
+
 
 
 
@@ -177,10 +359,10 @@ def main():
     # Set app title
     st.title("Movie Recommender and Analysis")
     st.write(
-        "A machine learning app to predict personal movie ratings for Letterboxd users. Also provides analysis of the users movie characteristic preferences."
+        "A machine learning app to predict personal movie ratings for Letterboxd users and provide recommendations. Also provides analysis of the users movie characteristic preferences."
     )
 
-    home, howto, about = st.tabs(['Home', 'How To', 'About'])
+    home, howto, about, me = st.tabs(['Home', 'How To', 'About', 'About Me'])
 
     with home:
         # Get ratings.csv file from user
@@ -202,6 +384,72 @@ def main():
                 preds, analysis = st.tabs(['Recommendations', 'Analysis'])
                 with preds:
                     print_recs(df_preds)
+                with analysis:
+                    st.title("Personalized Preference Analysis")
+                    print_analysis(df_preds, user_ratings, model)
+    
+    with howto:
+        st.title("How To Use the Website")
+        st.write('On this page, I will walk you through how to use the website. It is fairly simple, but you need to be sure you are submitting' +
+                 ' the correct file, so pay attention!')
+        st.header('Step One: Letterboxd')
+        st.write('First things first, you are going to need a Letterboxd account. If you have one, great! You can move on. '+
+                 'If not, you should really consider creating one and coming back after you have logged some movies. It is a great app, '+
+                 f'especially if you are a frequent movie watcher. You can create an account here: {'https://letterboxd.com/welcome/'}')
+        st.write('If you want to test out the website and its functionality without an account, you can use my ratings: ')
+
+        # test data for user
+        file_path = 'D:/MovieRecommender.com/Data/user_test_ratings.csv'
+        data = pd.read_csv(file_path)
+
+        import base64
+        def download_csv():
+            csv = data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()  # Encoding the CSV file
+            href = f'<a href="data:file/csv;base64,{b64}" download="movie_test_ratings.csv">Download CSV file</a>'
+            return href
+
+        # Display the download button
+        st.markdown(download_csv(), unsafe_allow_html=True)
+        st.write('Now just use that downloaded file to submit on the home page.')
+
+
+        st.header('Step Two: Downloading your ratings')
+        st.write('Please note: This process will be significantly easier from a laptop or desktop.')
+        st.write(f'1. Navigate to {'https://letterboxd.com/welcome/'}')
+        st.write('2. Sign in to your account')
+        st.write('3. Navigate to Settings>Data>Export Your Data')
+        st.write("4. After that, you should get a downloaded zip file on your computer starting with 'letterboxd'")
+        st.write("5. Extract this file to a location of your choosing, and now you are ready to go!")
+
+        st.header('Step Three: Submitting your ratings')
+        st.write("Navigate back to the website and click on the 'Browse files' button." +
+                  " Submit the file 'ratings.csv' from your downloaded folder and watch the magic happen!")
+        st.write("Important: Make sure you are submitting 'ratings.csv' and nothing else!")
+
+    #with about:
+
+
+    with me:
+        st.title("About The Creator")
+        st.header("Grant Hohol")
+        img, txt = st.columns([0.2,0.8], vertical_alignment='bottom')
+        with img:
+            st.image('D:/MovieRecommender.com/PersonalStuff/IMG_5306.JPG')
+        with txt:
+            st.write("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, a data enthusiast, and a sports junkie. " +
+                     "At Univeristy, I study Computer Sciences and Statisitics, both of which helped me create this website, although I am also largely self taught.")
+            st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
+            st.write("~ Resume")
+            st.write(f"~ Github: [@granthohol]{'https://github.com/granthohol/'}")
+            st.write(f"~ [LinkedIn]{'https://www.linkedin.com/in/grant-hohol-08520b291/'}")
+            st.write(f"~ X (Twitter): [@granthohol55]{'https://x.com/granthohol55'}")
+            st.write("~ Email: ghohol@wisc.edu")
+            st.write("~ Phone: 920-370-2380")
+
+
+        
+
            
 
 
