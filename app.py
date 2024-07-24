@@ -125,7 +125,7 @@ def print_recs(movies_no_user: pd.DataFrame):
         movies_no_user = movies_no_user[movies_no_user['english'] == True]
     
     # filter for only kids movies
-    only_kid = st.sidebar.checkbox("Non-Adult Only", False)
+    only_kid = st.sidebar.checkbox("Kid Friendly", False)
     if only_kid:
         movies_no_user = movies_no_user[movies_no_user['adult'] == False]
 
@@ -178,8 +178,7 @@ def print_recs(movies_no_user: pd.DataFrame):
     
     output['Genres'] = output.apply(combine_genres, axis=1)
 
-    output = output[['Title', 'Genres', 'Letterboxd Rating', 'Predicted Rating', 'Release Year', 'Runtime', 'tagline', 'description', 
-                    'adult', 'english']]
+    output = output[['Title', 'Genres', 'Letterboxd Rating', 'Predicted Rating', 'Release Year', 'Runtime','adult', 'english', 'tagline', 'description']]
     
 
     # Output top 5 with image, description, etc
@@ -241,7 +240,7 @@ def print_analysis(movies_no_user, user_ratings, model):
     genre_feature_importance = feature_importance[feature_importance['Feature'].isin(['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 
             'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'])]
 
-    st.header("By Genre")
+    st.header("Genre")
     st.write('Expand for a better view')
     # Initialize Matplotlib figure and axis
     fig, genre = plt.subplots(figsize=(24, 20))
@@ -262,6 +261,35 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.pyplot(fig)
     st.write('This graph tells you how much each genre, removing all other factors, effects your personal ratings. ' + 
              'The further to the right, the more you like that genre, and the further to the left, the more you dislike that genre, according to the model.')
+    
+
+    # genre freq plot
+
+    movies = pd.read_csv("Data/movies_cleaned.csv")
+    user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
+    user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
+    movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
+    movies_with_user = movies_with_user.drop_duplicates(subset=['name', 'date'])
+    
+    import random
+
+    colors = []
+    genre_counts = movies_with_user.loc[:, 'Action':].drop(columns=['english']).sum()
+    for _ in range(len(genre_counts)):
+        colors.append('#%06x' % random.randint(0, 0xFFFFFF)) 
+
+
+    plt.figure(figsize=(24, 20))
+    genre_counts.plot(kind='bar', color=colors)
+    plt.title('What Genres Do You Watch the Most?', fontsize=36)
+    plt.xlabel('Genre', fontsize=24)
+    plt.ylabel('Frequency', fontsize=24)
+    plt.xticks(rotation=45, ha='right', fontsize=24)
+    plt.yticks(fontsize=24)
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    st.write("Now, which genres are you watching the most? Does this align with your 'favorite' genres as seen above? If not, try to change up what you're watching.")
     
 
 
@@ -298,15 +326,11 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.write('')
     st.title('Your Ratings vs Letterboxd Ratings')
 
-    movies = pd.read_csv("Data/movies_cleaned.csv")
-    user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
-    user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
-    movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
-    movies_with_user = movies_with_user.drop_duplicates(subset=['name', 'date'])
+
     
     
     # Create a Plotly figure
-    fig3 = px.scatter(movies_with_user, x='rating', y='userRating', trendline='ols', marginal_y='violin',
+    fig3 = px.scatter(movies_with_user, x='rating', y='userRating', trendline='ols',
                  title='User Ratings vs Letterboxd Ratings',
                  hover_name='name', hover_data={'rating': True, 'userRating': True})
 
@@ -326,6 +350,23 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.write('Here you can see the correlation between your ratings and letterboxd ratings. Expand for a better view and hover over dots to see which movie it is.')
     st.write('')
 
+    # distribution plot
+    plt.figure(figsize=(24, 20))
+
+    sns.kdeplot(movies_with_user['userRating'], color='blue', fill=True, linewidth=2 )
+    sns.kdeplot(movies_with_user['rating'], color='red', fill=True, linewidth=2)
+
+    plt.title('Distribution of Your Ratings vs Letterboxd Ratings', fontsize=36)
+    plt.xlabel('Rating', fontsize=32)
+    plt.ylabel('Frequency', fontsize=32)
+    plt.xticks(fontsize=24)
+    plt.yticks(fontsize=24)
+    plt.legend(['Your Ratings', 'Letterboxd Ratings'], fontsize=24)
+
+    st.pyplot(plt)
+
+    st.write("Here is a distribution of your ratings vs Letterboxd ratings for the movies you watched. Do you tend to over rate or under rate? "+
+             "Do you have more variability or less variability in your ratings?")
 
 
 
@@ -346,6 +387,8 @@ def print_analysis(movies_no_user, user_ratings, model):
     movies_liked_less = movies_liked_less.reset_index(drop=True)
     movies_liked_less.index = movies_liked_less.index + 1
     st.dataframe(movies_liked_less.head())
+
+    st.write('Putting it all together, here are the top 5 movies you liked more/less than the Letterboxd consensus.')
 
 
 @st.cache_data
