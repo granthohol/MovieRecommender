@@ -327,6 +327,8 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.write('')
 
 
+
+
     # Top 5 movies liked more and liked less
 
     movies_with_user['Difference'] = movies_with_user['userRating'] - movies_with_user['rating']
@@ -398,9 +400,13 @@ def print_about():
         st.header('The Model')
         st.subheader('Type')
         st.write('The model used to make ratings predictions is a Ridge Regression model that gets trained on the user data once submitted.')
-        st.write('I chose a Ridge Regression model because it performed well compared to other models on test data from my ratings and some of my friends.' +
-                 ' It is also a fast and interpretable model which helps a lot with what I am trying to accomplish -- training the model in live time and ' +
+        st.write('I chose a Ridge Regression model for a variety of reasons')
+        st.write(' 1. Ridge Regression performed well compared to other models on test data from my ratings and some of my friends.')
+        st.write('2. It is  a fast and interpretable model which helps a lot with what I am trying to accomplish -- training the model in live time and ' +
                  'outputting feature coefficients to the user.')
+        st.write('3. Regularizaiton impact: ' +
+                 'The penalization of coefficients to prevent overfitting by regulating the loss function is crucial here because I have a feature (Letterboxd Rating) '+
+                 'that kind of dominates most of the other features and may lead to overfitting in a lot of other models.')
         st.subheader('Parameters')
         st.write('The models parameters are determined, again, in live time after user submission. I use a Grid Search to determine the best parameters for the particular user.')
         st.markdown("You can check out the code for this website in more detail on my [github]('https://github.com/granthohol/MovieRecommender.com')")
@@ -411,6 +417,7 @@ def print_about():
                  ' You can also pull the code from the github linked above to add anything you want yourself.')
         
         st.header('Patch Notes')   
+        st.write('To come')
 
 @st.cache_data
 def print_me():
@@ -420,10 +427,21 @@ def print_me():
         with img:
             st.image('PersonalStuff/IMG_5306.JPG', use_column_width=True)
         with txt:
-            st.write("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, a data enthusiast, and a sports junkie. " +
-                     "At Univeristy, I study Computer Sciences and Statisitics, both of which helped me create this website, although I am also largely self taught.")
+            st.markdown("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, where I study Computer Sciences and Statistics, both of which helped me create this website, although I am also largely self taught. " +
+                     "I love the challenges and rewards of unraveling complex data through coding and finding interesting insights. Away from the keyboard, " +
+                     "I'm a sports junkie (somewhere I like to deploy my data skills, as you can see on my resume/github), an avid reader (check out my [storygraph]('https://app.thestorygraph.com/profile/granthohol55')), " +
+                     "and a staunch pursuer of personal fitness (follow me on [Strava]('https://www.strava.com/athletes/122667425')).")
             st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
-            st.write("~ Resume")
+
+            # Function to convert a PDF file to a base64 string
+            import base64
+            def get_base64_of_bin_file(bin_file):
+                with open(bin_file, 'rb') as f:
+                    data = f.read()
+                return base64.b64encode(data).decode()
+            pdf_base64 = get_base64_of_bin_file('PersonalStuff/Resume - Grant Hohol.pdf')
+
+            st.markdown(f'<a href="data:application/pdf;base64,{pdf_base64}" download="resume.pdf">~ Download resume</a>', unsafe_allow_html=True)
             st.markdown("~ Github: [@granthohol]('https://github.com/granthohol/')")
             st.markdown("~ [LinkedIn]('https://www.linkedin.com/in/grant-hohol-08520b291/')")
             st.markdown("~ X (Twitter): [@granthohol55]('https://x.com/granthohol55')")
