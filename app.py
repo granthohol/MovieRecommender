@@ -21,7 +21,7 @@ def model_creation(user_ratings: pd.DataFrame):
     """
 
     ########## Initialize Data ##############
-    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
+    movies = pd.read_csv("Data/movies_cleaned.csv")
     user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
     user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
     movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
@@ -48,7 +48,7 @@ def model_creation(user_ratings: pd.DataFrame):
     ridge = Ridge()
 
     # Perform grid search with cross-validation
-    grid_search = GridSearchCV(estimator=ridge, param_grid=param_grid, cv=12, scoring='neg_mean_squared_error')
+    grid_search = GridSearchCV(estimator=ridge, param_grid=param_grid, cv=8, scoring='neg_mean_squared_error')
     grid_search.fit(features, target)
 
     # Train the model with the best parameters
@@ -71,7 +71,7 @@ def predict(model, user_ratings):
     """
 
     ########### Initialize Data #######################
-    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
+    movies = pd.read_csv("Data/movies_cleaned.csv")
     user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
     user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
     merged_df = pd.merge(movies, user_ratings, how='outer', on=['name', 'date'])
@@ -116,7 +116,6 @@ def print_recs(movies_no_user: pd.DataFrame):
     """
     ########### Output to app ##################
 
-    #TODO: more sidebar filters
     # Sidebar
     st.sidebar.title('Filters')
     st.sidebar.subheader('Use the filters to edit what types of movies come up as recommendations')
@@ -299,7 +298,7 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.write('')
     st.title('Your Ratings vs Letterboxd Ratings')
 
-    movies = pd.read_csv("D:/MovieRecommender.com/Data/movies_cleaned.csv")
+    movies = pd.read_csv("Data/movies_cleaned.csv")
     user_ratings = user_ratings.rename(columns={'Name' : 'name', 'Rating':'userRating', 'Year' : 'date'})
     user_ratings = user_ratings.drop(columns=['Date', 'Letterboxd URI'])
     movies_with_user = pd.merge(user_ratings, movies, how='inner', on=['name', 'date'])
@@ -347,11 +346,89 @@ def print_analysis(movies_no_user, user_ratings, model):
     st.dataframe(movies_liked_less.head())
 
 
+@st.cache_data
+def print_howto():
+        st.title("How To Use the Website")
+        st.write('On this page, I will walk you through how to use the website. It is fairly simple, but you need to be sure you are submitting' +
+                 ' the correct file, so pay attention!')
+        st.header('Step One: Letterboxd')
+        st.write('First things first, you are going to need a Letterboxd account. If you have one, great! You can move on. '+
+                 'If not, you should really consider creating one and coming back after you have logged some movies. It is a great app, '+
+                 f'especially if you are a frequent movie watcher. You can create an account here: {'https://letterboxd.com/welcome/'}')
+        st.write('If you want to test out the website and its functionality without an account, you can use my ratings: ')
+
+        # test data for user
+        file_path = 'Data/user_test_ratings.csv'
+        data = pd.read_csv(file_path)
+
+        import base64
+        def download_csv():
+            csv = data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()  # Encoding the CSV file
+            href = f'<a href="data:file/csv;base64,{b64}" download="movie_test_ratings.csv">Download CSV file</a>'
+            return href
+
+        # Display the download button
+        st.markdown(download_csv(), unsafe_allow_html=True)
+        st.write('Now just use that downloaded file to submit on the home page.')
 
 
+        st.header('Step Two: Downloading your ratings')
+        st.write('Please note: This process will be significantly easier from a laptop or desktop.')
+        st.markdown("1. Navigate to [Letterboxd]('https://letterboxd.com/welcome/')")
+        st.write('2. Sign in to your account')
+        st.write('3. Navigate to Settings>Data>Export Your Data')
+        st.write("4. After that, you should get a downloaded zip file on your computer starting with 'letterboxd'")
+        st.write("5. Extract this file to a location of your choosing, and now you are ready to go!")
 
+        st.header('Step Three: Submitting your ratings')
+        st.write("Navigate back to the website and click on the 'Browse files' button." +
+                  " Submit the file 'ratings.csv' from your downloaded folder and watch the magic happen!")
+        st.write("Important: Make sure you are submitting 'ratings.csv' and nothing else!")    
 
+def print_about():
+        st.header("The Data")
+        st.markdown("The data for this website was obtained from two different Kaggle datasets." + 
+                 " Big thanks to [Simon Garanin]('https://www.kaggle.com/gsimonx37') and [Asanickza]('https://www.kaggle.com/asaniczka') for supplying these.")
+        st.markdown("1. [Letterboxd data]('https://www.kaggle.com/datasets/gsimonx37/letterboxd')")
+        st.markdown("2. [Data for movie popularity]('https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies')")
 
+        st.write('')
+
+        st.header('The Model')
+        st.subheader('Type')
+        st.write('The model used to make ratings predictions is a Ridge Regression model that gets trained on the user data once submitted.')
+        st.write('I chose a Ridge Regression model because it performed well compared to other models on test data from my ratings and some of my friends.' +
+                 ' It is also a fast and interpretable model which helps a lot with what I am trying to accomplish -- training the model in live time and ' +
+                 'outputting feature coefficients to the user.')
+        st.subheader('Parameters')
+        st.write('The models parameters are determined, again, in live time after user submission. I use a Grid Search to determine the best parameters for the particular user.')
+        st.markdown("You can check out the code for this website in more detail on my [github]('https://github.com/granthohol/MovieRecommender.com')")
+
+        st.header('Bugs and Suggestions')
+        st.write('Any bugs on the website or general suggestions you have can be emailed to ghohol@wisc.edu.'+
+                 ' I appreciate any and all feedback! I will always be looking to add additional features.' +
+                 ' You can also pull the code from the github linked above to add anything you want yourself.')
+        
+        st.header('Patch Notes')   
+
+@st.cache_data
+def print_me():
+        st.title("About The Creator")
+        st.header("Grant Hohol")
+        img, txt = st.columns([0.3,0.7], vertical_alignment='top')
+        with img:
+            st.image('PersonalStuff/IMG_5306.JPG', use_column_width=True)
+        with txt:
+            st.write("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, a data enthusiast, and a sports junkie. " +
+                     "At Univeristy, I study Computer Sciences and Statisitics, both of which helped me create this website, although I am also largely self taught.")
+            st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
+            st.write("~ Resume")
+            st.markdown("~ Github: [@granthohol]('https://github.com/granthohol/')")
+            st.markdown("~ [LinkedIn]('https://www.linkedin.com/in/grant-hohol-08520b291/')")
+            st.markdown("~ X (Twitter): [@granthohol55]('https://x.com/granthohol55')")
+            st.write("~ Email: ghohol@wisc.edu")
+            st.write("~ Phone: 920-370-2380")
 
 
 def main():
@@ -389,86 +466,13 @@ def main():
                     print_analysis(df_preds, user_ratings, model)
     
     with howto:
-        st.title("How To Use the Website")
-        st.write('On this page, I will walk you through how to use the website. It is fairly simple, but you need to be sure you are submitting' +
-                 ' the correct file, so pay attention!')
-        st.header('Step One: Letterboxd')
-        st.write('First things first, you are going to need a Letterboxd account. If you have one, great! You can move on. '+
-                 'If not, you should really consider creating one and coming back after you have logged some movies. It is a great app, '+
-                 f'especially if you are a frequent movie watcher. You can create an account here: {'https://letterboxd.com/welcome/'}')
-        st.write('If you want to test out the website and its functionality without an account, you can use my ratings: ')
-
-        # test data for user
-        file_path = 'D:/MovieRecommender.com/Data/user_test_ratings.csv'
-        data = pd.read_csv(file_path)
-
-        import base64
-        def download_csv():
-            csv = data.to_csv(index=False)
-            b64 = base64.b64encode(csv.encode()).decode()  # Encoding the CSV file
-            href = f'<a href="data:file/csv;base64,{b64}" download="movie_test_ratings.csv">Download CSV file</a>'
-            return href
-
-        # Display the download button
-        st.markdown(download_csv(), unsafe_allow_html=True)
-        st.write('Now just use that downloaded file to submit on the home page.')
-
-
-        st.header('Step Two: Downloading your ratings')
-        st.write('Please note: This process will be significantly easier from a laptop or desktop.')
-        st.write(f'1. Navigate to {'https://letterboxd.com/welcome/'}')
-        st.write('2. Sign in to your account')
-        st.write('3. Navigate to Settings>Data>Export Your Data')
-        st.write("4. After that, you should get a downloaded zip file on your computer starting with 'letterboxd'")
-        st.write("5. Extract this file to a location of your choosing, and now you are ready to go!")
-
-        st.header('Step Three: Submitting your ratings')
-        st.write("Navigate back to the website and click on the 'Browse files' button." +
-                  " Submit the file 'ratings.csv' from your downloaded folder and watch the magic happen!")
-        st.write("Important: Make sure you are submitting 'ratings.csv' and nothing else!")
+        print_howto()
 
     with about:
-        st.header("The Data")
-        st.write(f"The data for this website was obtained from two different Kaggle datasets." + 
-                 " Big thanks to [Simon Garanin]{'https://www.kaggle.com/gsimonx37'} and [Asanickza]{'https://www.kaggle.com/asaniczka'} for supplying these.")
-        st.write(f"1. [Letterboxd data]{'https://www.kaggle.com/datasets/gsimonx37/letterboxd'}")
-        st.write(f"2. [Data for movie popularity]{'https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies'}")
-
-        st.write('')
-
-        st.header('The Model')
-        st.subheader('Type')
-        st.write('The model used to make ratings predictions is a Ridge Regression model that gets trained on the user data once submitted.')
-        st.write('I chose a Ridge Regression model because it performed well compared to other models on test data from my ratings and some of my friends.' +
-                 ' It is also a fast and interpretable model which helps a lot with what I am trying to accomplish -- training the model in live time and ' +
-                 'outputting feature coefficients to the user.')
-        st.subheader('Parameters')
-        st.write('The models parameters are determined, again, in live time after user submission. I use a Grid Search to determine the best parameters for the particular user.')
-        st.write(f'You can check out the code for this website in more detail on my [github]{'https://github.com/granthohol/MovieRecommender.com'}')
-
-        st.header('Bugs and Suggestions')
-        st.write('Any bugs on the website or general suggestions you have can be emailed to ghohol@wisc.edu.'+
-                 ' I appreciate any and all feedback! I will always be looking to add additional features.' +
-                 ' You can also pull the code from the github linked above to add anything you want yourself.')
-        
-        st.header('Patch Notes')
+        print_about()
 
     with me:
-        st.title("About The Creator")
-        st.header("Grant Hohol")
-        img, txt = st.columns([0.2,0.8], vertical_alignment='bottom')
-        with img:
-            st.image('D:/MovieRecommender.com/PersonalStuff/IMG_5306.JPG')
-        with txt:
-            st.write("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, a data enthusiast, and a sports junkie. " +
-                     "At Univeristy, I study Computer Sciences and Statisitics, both of which helped me create this website, although I am also largely self taught.")
-            st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
-            st.write("~ Resume")
-            st.write(f"~ Github: [@granthohol]{'https://github.com/granthohol/'}")
-            st.write(f"~ [LinkedIn]{'https://www.linkedin.com/in/grant-hohol-08520b291/'}")
-            st.write(f"~ X (Twitter): [@granthohol55]{'https://x.com/granthohol55'}")
-            st.write("~ Email: ghohol@wisc.edu")
-            st.write("~ Phone: 920-370-2380")
+        print_me()
 
 
         
