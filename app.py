@@ -278,14 +278,16 @@ def print_analysis(movies_no_user, user_ratings, model):
     for _ in range(len(genre_counts)):
         colors.append('#%06x' % random.randint(0, 0xFFFFFF)) 
 
+    genre_counts = genre_counts.sort_values(ascending=False)
+
 
     plt.figure(figsize=(24, 20))
     genre_counts.plot(kind='bar', color=colors)
     plt.title('What Genres Do You Watch the Most?', fontsize=36)
-    plt.xlabel('Genre', fontsize=24)
-    plt.ylabel('Frequency', fontsize=24)
-    plt.xticks(rotation=45, ha='right', fontsize=24)
-    plt.yticks(fontsize=24)
+    plt.xlabel('Genre', fontsize=32)
+    plt.ylabel('Frequency', fontsize=32)
+    plt.xticks(rotation=45, ha='right', fontsize=30)
+    plt.yticks(fontsize=30)
     plt.tight_layout()
     st.pyplot(plt)
 
