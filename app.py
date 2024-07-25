@@ -338,7 +338,7 @@ def print_analysis(movies_no_user, user_ratings, model):
         xaxis_title='Letterboxd Rating',
         yaxis_title='User Rating',
         hoverlabel=dict(
-            bgcolor="white",  # Background color of tooltip
+            bgcolor="red",  # Background color of tooltip
             font_size=12,     # Font size of tooltip text
             font_family="Arial"
         ),
@@ -420,7 +420,7 @@ def print_howto():
 
         st.header('Step Two: Downloading your ratings - Laptop or Desktop')
         st.write('Please note: This process will most likely be easier from a laptop or desktop.')
-        st.markdown("1. Navigate to [Letterboxd]('https://letterboxd.com/welcome/')")
+        st.markdown("1. Navigate to [Letterboxd](https://letterboxd.com/welcome/)")
         st.write('2. Sign in to your account')
         st.write('3. Navigate to Settings > Data > Export Your Data')
         st.write("4. After that, you should get a downloaded zip file on your computer starting with 'letterboxd'")
@@ -440,9 +440,9 @@ def print_howto():
 def print_about():
         st.header("The Data")
         st.markdown("The data for this website was obtained from two different Kaggle datasets." + 
-                 " Big thanks to [Simon Garanin]('https://www.kaggle.com/gsimonx37') and [Asanickza]('https://www.kaggle.com/asaniczka') for supplying these.")
-        st.markdown("1. [Letterboxd data]('https://www.kaggle.com/datasets/gsimonx37/letterboxd')")
-        st.markdown("2. [Data for movie popularity]('https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies')")
+                 " Big thanks to [Simon Garanin](https://www.kaggle.com/gsimonx37) and [Asanickza](https://www.kaggle.com/asaniczka) for supplying these.")
+        st.markdown("1. [Letterboxd data](https://www.kaggle.com/datasets/gsimonx37/letterboxd)")
+        st.markdown("2. [Data for movie popularity](https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies)")
 
         st.write('')
 
@@ -458,7 +458,7 @@ def print_about():
                  'that kind of dominates most of the other features and may lead to overfitting in a lot of other models.')
         st.subheader('Parameters')
         st.write('The models parameters are determined, again, in live time after user submission. I use a Grid Search to determine the best parameters for the particular user.')
-        st.markdown("You can check out the code for this website in more detail on my [github]('https://github.com/granthohol/MovieRecommender.com')")
+        st.markdown("You can check out the code for this website in more detail on my [github](https://github.com/granthohol/MovieRecommender.com)")
 
         st.header('Bugs and Suggestions')
         st.write('Any bugs on the website or general suggestions you have can be emailed to ghohol@wisc.edu.'+
@@ -478,8 +478,8 @@ def print_me():
         with txt:
             st.markdown("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, where I study Computer Sciences and Statistics, both of which helped me create this website, although I am also largely self taught. " +
                      "I love the challenges and rewards of unraveling complex data through coding and finding interesting insights. Away from the keyboard, " +
-                     "I'm a sports junkie (somewhere I like to deploy my data skills, as you can see on my resume/github), an avid reader (check out my [storygraph]('https://app.thestorygraph.com/profile/granthohol55')), " +
-                     "and a staunch pursuer of personal fitness (follow me on [Strava]('https://www.strava.com/athletes/122667425')).")
+                     "I'm a sports junkie (somewhere I like to deploy my data skills, as you can see on my resume/github), an avid reader (check out my [storygraph](https://app.thestorygraph.com/profile/granthohol55)), " +
+                     "and a staunch pursuer of personal fitness (follow me on [Strava](https://www.strava.com/athletes/122667425)).")
             st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
 
             # Function to convert a PDF file to a base64 string
@@ -491,9 +491,9 @@ def print_me():
             pdf_base64 = get_base64_of_bin_file('PersonalStuff/Resume - Grant Hohol.pdf')
 
             st.markdown(f'<a href="data:application/pdf;base64,{pdf_base64}" download="resume.pdf">~ Download resume</a>', unsafe_allow_html=True)
-            st.markdown("~ Github: [@granthohol]('https://github.com/granthohol/')")
-            st.markdown("~ [LinkedIn]('https://www.linkedin.com/in/grant-hohol-08520b291/')")
-            st.markdown("~ X (Twitter): [@granthohol55]('https://x.com/granthohol55')")
+            st.markdown("~ Github: [@granthohol](https://github.com/granthohol/)")
+            st.markdown("~ [LinkedIn](https://www.linkedin.com/in/grant-hohol-08520b291/)")
+            st.markdown("~ X (Twitter): [@granthohol55](https://x.com/granthohol55)")
             st.write("~ Email: ghohol@wisc.edu")
             st.write("~ Phone: 920-370-2380")
 
