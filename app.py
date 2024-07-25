@@ -418,13 +418,19 @@ def print_howto():
         st.write('Now just use that downloaded file to submit on the home page.')
 
 
-        st.header('Step Two: Downloading your ratings')
-        st.write('Please note: This process will be significantly easier from a laptop or desktop.')
+        st.header('Step Two: Downloading your ratings - Laptop or Desktop')
+        st.write('Please note: This process will most likely be easier from a laptop or desktop.')
         st.markdown("1. Navigate to [Letterboxd]('https://letterboxd.com/welcome/')")
         st.write('2. Sign in to your account')
-        st.write('3. Navigate to Settings>Data>Export Your Data')
+        st.write('3. Navigate to Settings > Data > Export Your Data')
         st.write("4. After that, you should get a downloaded zip file on your computer starting with 'letterboxd'")
         st.write("5. Extract this file to a location of your choosing, and now you are ready to go!")
+
+        st.header('Step Two: Downloading your ratings - IOS')
+        st.write('As mentioned above, I encourage you to try this out on laptop/desktop')
+        st.write('1. Open your Letterboxd app')
+        st.write('2. Navigate to Account (far right icon) > Settings (top left) > Advanced Settings > Account Data (At bottom) > Export Your Data')
+        st.write("3. You should recieve a .zip download. Within this zip is a file called 'ratings.csv'. If you see this, you are ready to go!")
 
         st.header('Step Three: Submitting your ratings')
         st.write("Navigate back to the website and click on the 'Browse files' button." +
