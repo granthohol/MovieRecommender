@@ -476,7 +476,7 @@ def print_me():
         img, txt = st.columns([0.3,0.7], vertical_alignment='top')
         with img:
             try:
-                st.image('PersonalStuff/IMG_5306.jpg', use_column_width=True)
+                st.image('PersonalStuff/IMG_5306.JPG', use_column_width=True)
             except Exception as e:
                 st.error('Error loading image')
         with txt:
