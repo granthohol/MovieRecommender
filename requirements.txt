@@ -3,5 +3,5 @@ numpy
 scikit-learn
 seaborn
 matplotlib
-plotly
-streamlit
+plotly=-2.52.2
+streamlit==1.24.0
