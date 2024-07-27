@@ -9,7 +9,7 @@ If you want to download the project to make your own, follow the instructions be
 Ran in VsCode. Used Python==3.12.4
 
 ### Packages Used
-Install requirements.txt to download all necessary packages
+Run 'conda env create -f environment.yml' to install necessary packages
 
 ## Data
 ### Source Data

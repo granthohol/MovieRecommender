@@ -1,0 +1,10 @@
+name: movienv
+dependencies:
+  - python=3.9
+  - streamlit
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - plotly
+  - seaborn
