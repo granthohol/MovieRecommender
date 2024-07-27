@@ -475,7 +475,10 @@ def print_me():
         st.header("Grant Hohol")
         img, txt = st.columns([0.3,0.7], vertical_alignment='top')
         with img:
-            st.image('PersonalStuff/IMG_5306.JPG', use_column_width=True)
+            try:
+                st.image('PersonalStuff/IMG_5306.jpg', use_column_width=True)
+            except Exception as e:
+                st.error('Error loading image')
         with txt:
             st.markdown("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, where I study Computer Sciences and Statistics, both of which helped me create this website, although I am also largely self taught. " +
                      "I love the challenges and rewards of unraveling complex data through coding and finding interesting insights. Away from the keyboard, " +
