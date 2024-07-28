@@ -157,14 +157,10 @@ def print_recs(movies_no_user: pd.DataFrame):
         ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 
          'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western']
     )
-    
-    # Function to check if a movie has any of the excluded genres
-    def has_excluded_genre(genres, excluded_genres):
-        return any(genre in genres for genre in excluded_genres)
 
     # Filter the DataFrame to exclude movies with the selected genres
     if genre_none_filter:
-        movies_no_user = movies_no_user[~movies_no_user['genres'].apply(has_excluded_genre, excluded_genres=genre_none_filter)]
+        movies_no_user = movies_no_user[~movies_no_user['genres'].isin(genre_none_filter)]
 
     # Text input for minimum release year
     year_min = st.sidebar.text_input("Minimum Release Year", "1900")
