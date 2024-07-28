@@ -497,15 +497,16 @@ def print_me():
 
 def main():
 
-    # Set app title
-    st.title("Movie Recommender and Analysis")
-    st.write(
-        "A machine learning app to predict personal movie ratings for Letterboxd users and provide recommendations. Also provides analysis of the users movie characteristic preferences."
-    )
+
 
     home, howto, about, me = st.tabs(['Home', 'How To', 'About', 'About Me'])
 
     with home:
+            # Set app title
+        st.title("Letterboxd Movie Recommender")
+        st.write(
+            "A machine learning app to predict personal movie ratings for Letterboxd users and provide recommendations. Also provides analysis of the users movie ratings and characteristic preferences."
+        )
         # Get ratings.csv file from user
         csv_file = st.file_uploader(
             "Upload your ratings.csv file from Letterboxd to get recommendations and insights. Note: It may take a second.", type="csv")
