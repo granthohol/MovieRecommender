@@ -153,7 +153,7 @@ def print_recs(movies_no_user: pd.DataFrame):
     movies_no_user = movies_no_user[movies_no_user[genre_filter].all(axis=1)]
 
     genre_none_filter = st.sidebar.multiselect(
-        "Must have genre(s)",
+        "Genres NOT to include",
         ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 
          'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western']
     )
@@ -162,7 +162,7 @@ def print_recs(movies_no_user: pd.DataFrame):
     def has_excluded_genre(genres, excluded_genres):
         return any(genre in genres for genre in excluded_genres)
 
-# Filter the DataFrame to exclude movies with the selected genres
+    # Filter the DataFrame to exclude movies with the selected genres
     if genre_none_filter:
         movies_no_user = movies_no_user[~movies_no_user['genres'].apply(has_excluded_genre, excluded_genres=genre_none_filter)]
 
