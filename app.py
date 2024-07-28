@@ -159,8 +159,8 @@ def print_recs(movies_no_user: pd.DataFrame):
     )
 
     # Filter the DataFrame to exclude movies with the selected genres
-    if genre_none_filter:
-        movies_no_user = movies_no_user[~movies_no_user['genres'].isin(genre_none_filter)]
+    movies_no_user = movies_no_user[~movies_no_user[genre_none_filter].any(axis=1)]
+
 
     # Text input for minimum release year
     year_min = st.sidebar.text_input("Minimum Release Year", "1900")
