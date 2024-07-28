@@ -473,33 +473,26 @@ def print_about():
 def print_me():
         st.title("About The Creator")
         st.header("Grant Hohol")
-        img, txt = st.columns([0.3,0.7], vertical_alignment='top')
-        with img:
-            try:
-                st.image('PersonalStuff/IMG_5306.JPG', use_column_width=True)
-            except Exception as e:
-                st.error('Error loading image')
-        with txt:
-            st.markdown("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, where I study Computer Sciences and Statistics, both of which helped me create this website, although I am also largely self taught. " +
+        st.markdown("Hi, I'm Grant. I am a sophomore at the University of Wisconsin-Madison, where I study Computer Sciences and Statistics, both of which helped me create this website, although I am also largely self taught. " +
                      "I love the challenges and rewards of unraveling complex data through coding and finding interesting insights. Away from the keyboard, " +
                      "I'm a sports junkie (somewhere I like to deploy my data skills, as you can see on my resume/github), an avid reader (check out my [storygraph](https://app.thestorygraph.com/profile/granthohol55)), " +
                      "and a staunch pursuer of personal fitness (follow me on [Strava](https://www.strava.com/athletes/122667425)).")
-            st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
+        st.write("Here are some more places you can check out my work, my resume, or get in contact. I'm looking for internships or any cool projects I can help out on!")
 
             # Function to convert a PDF file to a base64 string
-            import base64
-            def get_base64_of_bin_file(bin_file):
-                with open(bin_file, 'rb') as f:
-                    data = f.read()
-                return base64.b64encode(data).decode()
-            pdf_base64 = get_base64_of_bin_file('PersonalStuff/Resume - Grant Hohol.pdf')
+        import base64
+        def get_base64_of_bin_file(bin_file):
+            with open(bin_file, 'rb') as f:
+                data = f.read()
+            return base64.b64encode(data).decode()
+        pdf_base64 = get_base64_of_bin_file('PersonalStuff/Resume - Grant Hohol.pdf')
 
-            st.markdown(f'<a href="data:application/pdf;base64,{pdf_base64}" download="resume.pdf">~ Download resume</a>', unsafe_allow_html=True)
-            st.markdown("~ Github: [@granthohol](https://github.com/granthohol/)")
-            st.markdown("~ [LinkedIn](https://www.linkedin.com/in/grant-hohol-08520b291/)")
-            st.markdown("~ X (Twitter): [@granthohol55](https://x.com/granthohol55)")
-            st.write("~ Email: ghohol@wisc.edu")
-            st.write("~ Phone: 920-370-2380")
+        st.markdown(f'<a href="data:application/pdf;base64,{pdf_base64}" download="resume.pdf">~ Download resume</a>', unsafe_allow_html=True)
+        st.markdown("~ Github: [@granthohol](https://github.com/granthohol/)")
+        st.markdown("~ [LinkedIn](https://www.linkedin.com/in/grant-hohol-08520b291/)")
+        st.markdown("~ X (Twitter): [@granthohol55](https://x.com/granthohol55)")
+        st.write("~ Email: ghohol@wisc.edu")
+        st.write("~ Phone: 920-370-2380")
 
 
 def main():
